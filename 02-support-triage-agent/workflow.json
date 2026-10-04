@@ -1,0 +1,52 @@
+{
+  "name": "Support Triage AI Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": { "item": [{ "mode": "everyMinute" }] },
+        "simple": false,
+        "filters": {}
+      },
+      "id": "gmail-trigger",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300],
+      "notes": "Replace with your real support channel trigger"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.snippet || $json.text || $json.body }}",
+        "options": {
+          "systemMessage": "You are a professional customer support triage agent. Analyze the ticket. Output ONLY valid JSON: {\"urgency\": \"low|medium|high|critical\", \"category\": \"string\", \"sentiment\": \"positive|neutral|negative\", \"draft_reply\": \"string\", \"needs_human\": boolean, \"reason\": \"string\"}. Follow company tone: helpful, concise, professional."
+        }
+      },
+      "id": "ai-triage",
+      "name": "AI Triage Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [520, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {}
+      },
+      "id": "model",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [520, 500]
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [[{ "node": "AI Triage Agent", "type": "main", "index": 0 }]]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [[{ "node": "AI Triage Agent", "type": "ai_languageModel", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}
